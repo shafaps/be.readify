@@ -21,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'novels',  // Specify the exact table name (plural or singular depending on your DB naming convention)
     modelName: 'Novel',   // Define modelName in PascalCase
-    underscored: true,    // Optional: if your DB tables use snake_case instead of camelCase
   });
 
   // Define associations
