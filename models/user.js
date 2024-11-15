@@ -44,7 +44,6 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'User',  // Menetapkan nama model (PascalCase)
     tableName: 'users',  // Nama tabel yang sesuai di database (huruf kecil, plural)
-    underscored: true,   // Menggunakan snake_case untuk kolom di database
   });
 
   return User;

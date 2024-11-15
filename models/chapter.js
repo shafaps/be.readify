@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'chapters',   // Menyebutkan nama tabel yang sesuai di database
     modelName: 'Chapter',    // Menetapkan nama model dalam PascalCase
-    underscored: true,       // (opsional) untuk menggunakan snake_case di kolom tabel
   });
 
   Chapter.associate = function(models) {

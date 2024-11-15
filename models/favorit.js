@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'favorites',   // Pastikan nama tabel sesuai dengan tabel di DB
     modelName: 'Favorite',    // Nama model dalam PascalCase
-    underscored: true,        // (opsional) untuk menggunakan snake_case di kolom tabel
   });
 
   // Relasi dengan model User dan Novel

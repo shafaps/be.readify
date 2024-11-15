@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'comments',  // Pastikan nama tabel sesuai dengan tabel di DB
     modelName: 'Comment',   // Nama model dalam PascalCase
-    underscored: true,      // (opsional) untuk menggunakan snake_case di kolom tabel
   });
 
   // Relasi dengan model User dan Novel
