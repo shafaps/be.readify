@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const Comment = sequelize.define('Comment', {
     userId: {
@@ -14,19 +15,21 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    tableName: 'comments',
+    tableName: 'comments',  // Pastikan nama tabel sesuai dengan tabel di DB
+    modelName: 'Comment',   // Nama model dalam PascalCase
+    underscored: true,      // (opsional) untuk menggunakan snake_case di kolom tabel
   });
 
   // Relasi dengan model User dan Novel
   Comment.associate = function(models) {
-    // Set relasi: Comment belongs to User dan Novel
+    // Relasi: Comment belongs to User dan Novel
     Comment.belongsTo(models.User, {
       foreignKey: 'userId',
-      as: 'user',
+      as: 'user',  // Nama relasi ke model User
     });
     Comment.belongsTo(models.Novel, {
       foreignKey: 'novelId',
-      as: 'novel',
+      as: 'novel',  // Nama relasi ke model Novel
     });
   };
 

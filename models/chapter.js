@@ -1,20 +1,24 @@
-// models/chapter.js
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const Chapter = sequelize.define('Chapter', {
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     content: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
     },
     novelId: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     }
-  }, {});
+  }, {
+    tableName: 'chapters',   // Menyebutkan nama tabel yang sesuai di database
+    modelName: 'Chapter',    // Menetapkan nama model dalam PascalCase
+    underscored: true,       // (opsional) untuk menggunakan snake_case di kolom tabel
+  });
 
   Chapter.associate = function(models) {
     // Set hubungan dengan Novel (many-to-one)

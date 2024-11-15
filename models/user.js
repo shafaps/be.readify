@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         as: 'comments',  // Menambahkan relasi 'comments' untuk akses komentar dari User
       });
 
-      // Relasi dengan model Favorite (jika ada)
+      // Relasi dengan model Favorite
       User.hasMany(models.Favorite, {
         foreignKey: 'userId',
         as: 'favorites',  // Relasi untuk favorit oleh user
@@ -42,7 +42,9 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    modelName: 'User',
+    modelName: 'User',  // Menetapkan nama model (PascalCase)
+    tableName: 'users',  // Nama tabel yang sesuai di database (huruf kecil, plural)
+    underscored: true,   // Menggunakan snake_case untuk kolom di database
   });
 
   return User;
