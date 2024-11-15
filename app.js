@@ -13,12 +13,13 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
 // Enable CORS for all origins (use with caution in production)
-app.use(cors());
+const corsOptions = {
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+};
 
-// If you want to allow specific origins only, you can do it like this:
-// app.use(cors({
-//   origin: ['https://example.com', 'https://another-domain.com']
-// }));
+// Enable CORS with options
+app.use(cors(corsOptions));
 
 // Use user-related routes
 app.use('/api/users', userRoutes);
