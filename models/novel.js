@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const Novel = sequelize.define('novels', {
+  const Novel = sequelize.define('Novel', {  // Model name is 'Novel' (PascalCase)
     title: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -18,14 +18,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+  }, {
+    tableName: 'novels',  // Specify the exact table name (plural or singular depending on your DB naming convention)
+    modelName: 'Novel',   // Define modelName in PascalCase
+    underscored: true,    // Optional: if your DB tables use snake_case instead of camelCase
   });
 
-  // Define association
+  // Define associations
   Novel.associate = function(models) {
     // Relasi dengan model Chapter
     Novel.hasMany(models.Chapter, {
       as: 'chapters',
-      foreignKey: 'novelId',  // relasi ke tabel chapter
+      foreignKey: 'novelId',  // Relasi ke tabel chapter
     });
 
     // Relasi dengan model Comment (jika ada)
