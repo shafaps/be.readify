@@ -15,37 +15,45 @@ const imagekit = new ImageKit({
 // Fungsi untuk mengunggah gambar ke ImageKit
 const uploadCoverImage = async (fileBuffer) => {
   try {
-    const uploadResponse = await imagekit.upload({
+    return await imagekit.upload({
       file: fileBuffer,
       fileName: `novel-cover-${Date.now()}`,
       folder: '/novel-covers',
     });
-    console.log('Image uploaded to ImageKit:', uploadResponse);
-    return uploadResponse;
   } catch (error) {
-    console.error('Error uploading image to ImageKit:', error);
+    console.error('Error uploading image to ImageKit:', error.message);
     throw new Error('Image upload failed');
   }
 };
 
-
-
 // Create a new novel
+
 const createNovel = async (req, res) => {
   try {
-    const { title, author, description } = req.body;
+    const { title, authorId, description } = req.body;
+
+    // Cek apakah authorId valid
+    const author = await User.findByPk(authorId);
+    if (!author) {
+      return res.status(404).json({ message: 'Author not found' });
+    }
+
+    // Ambil username dari authorId
+    const authorName = author.username;
 
     // Upload coverImage ke ImageKit jika disediakan
     let imageUrl = '';
-    if (req.file) { // Cek apakah ada file yang diupload
+    if (req.file) {
       const uploadResponse = await uploadCoverImage(req.file.buffer);
-      imageUrl = uploadResponse.url; // URL yang dihasilkan oleh ImageKit
+      imageUrl = uploadResponse.url;
     }
 
+    // Membuat novel baru dengan memasukkan username sebagai author
     const novel = await Novel.create({
       title,
-      author,
-      coverImage: imageUrl,  // Menyimpan URL gambar dari ImageKit
+      authorId,
+      author: authorName,  // Menyimpan username di kolom author
+      coverImage: imageUrl,
       description,
     });
 
@@ -56,11 +64,12 @@ const createNovel = async (req, res) => {
   }
 };
 
+
 // Update a novel by ID
 const updateNovel = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, author, description } = req.body;
+    const { title, authorId, description } = req.body;
 
     const novel = await Novel.findByPk(id);
 
@@ -69,13 +78,13 @@ const updateNovel = async (req, res) => {
     }
 
     // Jika ada coverImage baru, upload ke ImageKit
-    if (req.file) { // Cek apakah ada file yang diupload
+    if (req.file) {
       const uploadResponse = await uploadCoverImage(req.file.buffer);
-      novel.coverImage = uploadResponse.url; // URL yang dihasilkan oleh ImageKit
+      novel.coverImage = uploadResponse.url;
     }
 
     novel.title = title || novel.title;
-    novel.author = author || novel.author;
+    novel.authorId = authorId || novel.authorId;
     novel.description = description || novel.description;
 
     await novel.save();
@@ -86,19 +95,23 @@ const updateNovel = async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 // Get all novels
 const getAllNovels = async (req, res) => {
   try {
     const novels = await Novel.findAll({
-      include: [{
-        model: Chapter,
-        as: 'chapters', // Include chapters as a related model
-        attributes: ['id', 'title', 'content'] // Optional, include only necessary chapter fields
-      }]
+      include: [
+        {
+          model: Chapter,
+          as: 'chapters',
+          attributes: ['id', 'title', 'content'],
+        },
+      ],
     });
-    res.status(200).json(novels);
+    return res.status(200).json(novels);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching novels', error });
+    console.error('Error fetching novels:', error.message);
+    return res.status(500).json({ message: 'Error fetching novels', error: error.message });
   }
 };
 
@@ -107,61 +120,103 @@ const getNovelById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Mencari novel berdasarkan ID dengan relasi chapters dan comments
     const novel = await Novel.findByPk(id, {
       include: [
         {
           model: Chapter,
-          as: 'chapters', // Relasi dengan model Chapter
-          attributes: ['id', 'title', 'content'], // Hanya ambil atribut yang dibutuhkan
+          as: 'chapters',
+          attributes: ['id', 'title', 'content'],
         },
         {
           model: Comment,
-          as: 'comments', // Relasi dengan model Comment
+          as: 'comments',
           include: [
             {
               model: User,
-              as: 'user', // Relasi dengan User (untuk mendapatkan username)
-              attributes: ['id', 'username'], // Hanya ambil atribut user yang dibutuhkan
-            }
+              as: 'user',
+              attributes: ['id', 'username'],
+            },
           ],
-        }
+        },
       ],
     });
 
-    // Jika novel tidak ditemukan
     if (!novel) {
       return res.status(404).json({ message: 'Novel not found' });
     }
 
-    // Mengembalikan novel beserta chapters dan comments yang terkait
     return res.status(200).json(novel);
+  } catch (error) {
+    console.error('Error fetching novel by ID:', error.message);
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
+// Delete a novel by ID
+const deleteNovel = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const novel = await Novel.findByPk(id);
+    if (!novel) {
+      return res.status(404).json({ message: 'Novel not found' });
+    }
+
+    await novel.destroy();
+    return res.status(200).json({ message: 'Novel deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting novel:', error.message);
+    return res.status(500).json({ message: 'Error deleting novel', error: error.message });
+  }
+};
+
+
+
+const getNovelsByAuthorId = async (req, res) => {
+  try {
+    const { authorId } = req.params;
+
+    const novels = await Novel.findAll({
+      where: { authorId },
+      include: [
+        {
+          model: Chapter,
+          as: 'chapters',  // Pastikan nama alias ini sesuai dengan yang didefinisikan di model
+          attributes: ['id', 'title', 'content'],
+        },
+        {
+          model: Comment,
+          as: 'comments', // Pastikan nama alias ini sesuai dengan yang didefinisikan di model
+          include: [
+            {
+              model: User,
+              as: 'user', // Pastikan ini sesuai dengan alias relasi di model Comment
+              attributes: ['id', 'username'],
+            }
+          ],
+        }
+      ],
+      // Menambahkan raw:true dan nestResults: true untuk hasil yang lebih sederhana dan terstruktur
+      raw: true, 
+      nest: true, 
+    });
+
+    if (!novels || novels.length === 0) {
+      return res.status(404).json({ message: 'No novels found for this author' });
+    }
+
+    return res.status(200).json(novels);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
-// Delete a novel by ID
-const deleteNovel = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const novel = await Novel.findByPk(id);
-    if (novel) {
-      await novel.destroy();
-      res.status(200).json({ message: 'Novel deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Novel not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting novel', error });
-  }
-};
-
 module.exports = {
   getAllNovels,
   getNovelById,
+  getNovelsByAuthorId,
   createNovel,
   updateNovel,
-  deleteNovel
+  deleteNovel,
 };

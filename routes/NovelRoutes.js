@@ -18,4 +18,6 @@ router.put('/novels/:id', upload.single('coverImage'),novelController.updateNove
 // Route untuk menghapus novel
 router.delete('/novels/:id', novelController.deleteNovel);
 
+router.get('/novels/author/:authorId', novelController.getNovelsByAuthorId);
+
 module.exports = router;

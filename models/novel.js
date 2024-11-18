@@ -1,12 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const Novel = sequelize.define('Novel', {  // Model name is 'Novel' (PascalCase)
+  const Novel = sequelize.define('Novel', {
     title: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    author: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -18,9 +14,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    authorId: {
+      type: DataTypes.INTEGER,
+      allowNull: false, // pastikan authorId ada
+      references: {
+        model: 'users', // Mengacu pada tabel User
+        key: 'id', // Foreign key yang mengacu pada kolom id di tabel users
+      },
+      onUpdate: 'CASCADE', // Jika user diupdate, lakukan update juga di Novel
+      onDelete: 'SET NULL', // Jika user dihapus, set authorId menjadi NULL
+    },
+    author: {
+      type: DataTypes.STRING,
+      allowNull: true, // Kolom ini untuk menyimpan username penulis
+    },
   }, {
-    tableName: 'novels',  // Specify the exact table name (plural or singular depending on your DB naming convention)
-    modelName: 'Novel',   // Define modelName in PascalCase
+    tableName: 'novels', // Nama tabel di database
+    modelName: 'Novel', // Nama model yang digunakan
   });
 
   // Define associations
@@ -28,19 +38,26 @@ module.exports = (sequelize, DataTypes) => {
     // Relasi dengan model Chapter
     Novel.hasMany(models.Chapter, {
       as: 'chapters',
-      foreignKey: 'novelId',  // Relasi ke tabel chapter
+      foreignKey: 'novelId',
     });
 
-    // Relasi dengan model Comment (jika ada)
+    // Relasi dengan model Comment
     Novel.hasMany(models.Comment, {
+      as: 'comments',
       foreignKey: 'novelId',
-      as: 'comments',  // Menambahkan relasi ke komentar
     });
 
-    // Relasi dengan model Favorite (jika ada)
+    // Relasi dengan model Favorite
     Novel.hasMany(models.Favorite, {
+      as: 'favorites',
       foreignKey: 'novelId',
-      as: 'favorites',  // Relasi untuk favorit novel
+    });
+
+    // Relasi dengan model User untuk kolom `author` (ganti alias menjadi 'authorRelation')
+    Novel.belongsTo(models.User, {
+      as: 'authorRelation', // Alias yang diganti untuk menghindari bentrok
+      foreignKey: 'authorId', // Foreign key di tabel Novel
+      targetKey: 'id', // Kolom yang menjadi referensi di tabel User
     });
   };
 
