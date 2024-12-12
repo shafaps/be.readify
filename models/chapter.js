@@ -24,5 +24,6 @@ module.exports = (sequelize, DataTypes) => {
     Chapter.belongsTo(models.Novel, { foreignKey: 'novelId', as: 'novel' });
   };
 
+  
   return Chapter;
 };
