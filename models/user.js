@@ -56,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
           len: [6, 100], // Panjang password minimal 6 karakter
         },
       },
+      image: {
+        type: DataTypes.STRING,
+        allowNull: true, // This is correct, image can be null
+      },
       role: {
         type: DataTypes.ENUM('user', 'admin'),
         allowNull: false,

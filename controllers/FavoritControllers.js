@@ -11,7 +11,7 @@ exports.addFavorite = async (req, res) => {
     });
 
     if (existingFavorite) {
-      return res.status(400).json({ message: 'Novel sudah ada di favorit Anda.' });
+      return res.status(200).json({ message: 'Novel sudah ada di favorit Anda.' });
     }
 
     // Tambahkan novel ke favorit
