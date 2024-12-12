@@ -148,12 +148,14 @@ const loginUser = async (req, res) => {
       email: user.email,
       role: user.role,
       image: user.image,
-      token: token,  // Include the JWT token in the response
 
     };
 
+    
     return res.status(200).json({
       user: userResponse,
+      token: token,  // Include the JWT token in the response
+
     });
   } catch (error) {
     console.error('Error logging in user:', error);
